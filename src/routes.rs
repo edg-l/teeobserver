@@ -31,7 +31,10 @@ pub async fn ws_handler(
     let rx = state.events_sender.subscribe();
     // finalize the upgrade process by returning upgrade callback.
     // we can customize the callback by sending additional info such as address.
-    ws.on_upgrade(move |socket| handle_socket(socket, addr, rx))
+    ws.on_failed_upgrade(|error| {
+        error!("error upgrading connection: {error}");
+    })
+    .on_upgrade(move |socket| handle_socket(socket, addr, rx))
 }
 
 /// Actual websocket statemachine (one will be spawned per connection)
