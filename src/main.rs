@@ -21,7 +21,7 @@ use tokio::{
 use tower_http::{
     cors::{self, CorsLayer},
     timeout::TimeoutLayer,
-    trace::TraceLayer,
+    trace::{TraceLayer, DefaultMakeSpan},
 };
 use tracing::{error, info};
 
@@ -201,7 +201,10 @@ async fn run() -> anyhow::Result<()> {
     let app = Router::new()
         .route("/", get(|| async { Html(include_str!("log-viewer.html")) }))
         .route("/ws", get(routes::ws_handler))
-        .layer(TraceLayer::new_for_http())
+        .layer(
+            TraceLayer::new_for_http()
+                .make_span_with(DefaultMakeSpan::default().include_headers(true)),
+        )
         .layer(TimeoutLayer::new(Duration::from_secs(5)))
         .layer(
             CorsLayer::new()
