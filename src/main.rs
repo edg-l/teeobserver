@@ -2,7 +2,7 @@ use std::{
     collections::{HashSet, VecDeque},
     net::SocketAddr,
     sync::Arc,
-    time::{Duration, Instant},
+    time::Duration,
 };
 
 use axum::{routing::get, Router};
@@ -10,7 +10,7 @@ use http::Method;
 use reqwest::Client;
 use sqlx::{postgres::PgPoolOptions, PgPool};
 use structures::{MasterEvent, ServerListMap};
-use time::{OffsetDateTime, UtcOffset};
+use time::OffsetDateTime;
 use tokio::{
     sync::{
         broadcast::{self, Sender},
@@ -182,6 +182,12 @@ async fn run() -> anyhow::Result<()> {
                         }
                     }
 
+                    info!(
+                        "sent {} events to {} receivers",
+                        events.len(),
+                        events_sender.receiver_count()
+                    );
+
                     let mut lock_events = task_events.write().await;
                     lock_events.extend(events.drain(..));
                     let mut servers = task_servers.write().await;
@@ -193,7 +199,7 @@ async fn run() -> anyhow::Result<()> {
     });
 
     let app = Router::new()
-        .route("/", get(|| async { "a" }))
+        .route("/", get(|| async { include_str!("../README.md") }))
         .route("/ws", get(routes::ws_handler))
         .layer(TraceLayer::new_for_http())
         .layer(TimeoutLayer::new(Duration::from_secs(5)))
