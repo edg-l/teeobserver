@@ -1,4 +1,4 @@
-# teeobservable
+# teeobserver
 
 This tool continuously fetches the DDNet master server and observes the changes, broadcasting the events to connected websockets.
 
@@ -8,7 +8,7 @@ Port can be changed with the `PORT` environment variable.
 
 ```
 > RUST_LOG="teeobserver=debug"
-> teeobservable
+> teeobserver
 2023-10-02T14:18:54.933535Z DEBUG teeobserver::util: making request to master
 2023-10-02T14:18:55.419999Z DEBUG teeobserver::util: got 1139 servers
 2023-10-02T14:18:55.421385Z  INFO teeobserver: listening on http://127.0.0.1:3000
