@@ -1,0 +1,45 @@
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+</head>
+
+<body>
+
+<ul id="event-list" style="max-height: 100vh; overflow-y: auto; border: 1px dashed black; padding: 4px; margin: auto">
+
+</ul>
+
+</body>
+<script>
+    // Create WebSocket connection.
+
+    var loc = window.location, ws_uri;
+    if (loc.protocol === "https:") {
+        ws_uri = "wss:";
+    } else {
+        ws_uri = "ws:";
+    }
+    ws_uri += "//" + loc.host;
+    ws_uri += loc.pathname + "ws";
+
+
+    const socket = new WebSocket(ws_uri);
+
+    const target = document.querySelector('#event-list');
+
+    // Listen for messages
+    socket.addEventListener("message", (event) => {
+        let li = document.createElement("li");
+        let pre = document.createElement("pre");
+        pre.innerText = event.data;
+        li.appendChild(pre);
+        target.appendChild(li);
+        target.scrollTop = target.scrollHeight;
+        // console.log("Message from server ", event.data);
+    });
+
+</script>
+
+</html>

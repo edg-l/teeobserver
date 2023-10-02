@@ -5,7 +5,7 @@ use std::{
     time::Duration,
 };
 
-use axum::{routing::get, Router};
+use axum::{routing::get, Router, response::Html};
 use http::Method;
 use reqwest::Client;
 use sqlx::{postgres::PgPoolOptions, PgPool};
@@ -199,7 +199,7 @@ async fn run() -> anyhow::Result<()> {
     });
 
     let app = Router::new()
-        .route("/", get(|| async { include_str!("../README.md") }))
+        .route("/", get(|| async { Html(include_str!("log-viewer.html")) }))
         .route("/ws", get(routes::ws_handler))
         .layer(TraceLayer::new_for_http())
         .layer(TimeoutLayer::new(Duration::from_secs(5)))
