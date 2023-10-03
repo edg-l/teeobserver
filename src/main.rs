@@ -5,7 +5,7 @@ use std::{
     time::Duration,
 };
 
-use axum::{routing::get, Router, response::Html};
+use axum::{response::Html, routing::get, Router};
 use http::Method;
 use reqwest::Client;
 use sqlx::{postgres::PgPoolOptions, PgPool};
@@ -21,7 +21,7 @@ use tokio::{
 use tower_http::{
     cors::{self, CorsLayer},
     timeout::TimeoutLayer,
-    trace::{TraceLayer, DefaultMakeSpan},
+    trace::{DefaultMakeSpan, TraceLayer},
 };
 use tracing::{error, info};
 
@@ -124,10 +124,10 @@ async fn run() -> anyhow::Result<()> {
                                             address
                                         );*/
                                         events.push((
-                                            MasterEvent::ClientJoined(
-                                                (*player).clone(),
-                                                server.clone(),
-                                            ),
+                                            MasterEvent::ClientJoined {
+                                                client: (*player).clone(),
+                                                server: server.clone(),
+                                            },
                                             now,
                                         ));
                                     } else {
@@ -140,10 +140,10 @@ async fn run() -> anyhow::Result<()> {
                                         );
                                         */
                                         events.push((
-                                            MasterEvent::ClientLeft(
-                                                (*player).clone(),
-                                                server.clone(),
-                                            ),
+                                            MasterEvent::ClientLeft {
+                                                client: (*player).clone(),
+                                                server: server.clone(),
+                                            },
                                             now,
                                         ));
                                     }

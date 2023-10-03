@@ -77,8 +77,8 @@ pub struct ServerListMap {
 
 #[derive(Debug, Serialize, Clone)]
 pub enum MasterEvent {
-    ClientJoined(Client, Arc<Server>),
-    ClientLeft(Client, Arc<Server>),
+    ClientJoined { client: Client, server: Arc<Server> },
+    ClientLeft { client: Client, server: Arc<Server> },
     ServerWentOnline(Arc<Server>),
     ServerWentOffline(Arc<Server>),
 }
