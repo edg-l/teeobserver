@@ -70,7 +70,7 @@ async fn handle_event(
     event: Arc<(MasterEvent, OffsetDateTime)>,
 ) -> Result<(), axum::Error> {
     let payload = json!({
-        "time": event.1,
+        "time": event.1.to_string(),
         "event": event.0
     });
 
