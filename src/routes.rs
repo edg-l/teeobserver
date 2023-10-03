@@ -9,7 +9,7 @@ use axum::{
     TypedHeader,
 };
 use serde_json::json;
-use time::OffsetDateTime;
+use time::{OffsetDateTime, format_description};
 use tokio::sync::broadcast;
 use tracing::{error, info};
 
@@ -70,7 +70,7 @@ async fn handle_event(
     event: Arc<(MasterEvent, OffsetDateTime)>,
 ) -> Result<(), axum::Error> {
     let payload = json!({
-        "time": event.1.to_string(),
+        "time": event.1.format(&format_description::well_known::Iso8601::DEFAULT).unwrap(),
         "event": event.0
     });
 
