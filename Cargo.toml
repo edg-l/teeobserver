@@ -9,6 +9,9 @@ homepage = "https://github.com/edg-l/teeobserver"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
+[profile.release]
+lto = "fat"
+
 [profile.dev.package.sqlx-macros]
 opt-level = 3
 

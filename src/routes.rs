@@ -9,8 +9,8 @@ use axum::{
     TypedHeader,
 };
 use serde_json::json;
-use time::{OffsetDateTime, format_description};
-use tokio::sync::broadcast;
+use time::{format_description, OffsetDateTime};
+use tokio::sync::broadcast::{self, Sender};
 use tracing::{error, info};
 
 use crate::{structures::MasterEvent, AppState};
@@ -34,7 +34,7 @@ pub async fn ws_handler(
     ws.on_failed_upgrade(|error| {
         error!("error upgrading connection: {error}");
     })
-    .on_upgrade(move |socket| handle_socket(socket, addr, rx))
+    .on_upgrade(move |socket| handle_socket(socket, addr, rx, state.events_sender))
 }
 
 /// Actual websocket statemachine (one will be spawned per connection)
@@ -42,6 +42,7 @@ async fn handle_socket(
     mut socket: WebSocket,
     who: SocketAddr,
     mut events_rx: broadcast::Receiver<Arc<(MasterEvent, OffsetDateTime)>>,
+    events_tx: Arc<Sender<Arc<(MasterEvent, OffsetDateTime)>>>,
 ) {
     loop {
         tokio::select! {
@@ -57,7 +58,7 @@ async fn handle_socket(
                 }
             },
             Ok(event) = events_rx.recv() => {
-                if let Err(e) = handle_event(&mut socket, event).await {
+                if let Err(e) = handle_event(&mut socket, &events_tx, event).await {
                     error!("error sending event: {e}");
                 }
             }
@@ -67,9 +68,11 @@ async fn handle_socket(
 
 async fn handle_event(
     sock: &mut WebSocket,
+    sender: &Sender<Arc<(MasterEvent, OffsetDateTime)>>,
     event: Arc<(MasterEvent, OffsetDateTime)>,
 ) -> Result<(), axum::Error> {
     let payload = json!({
+        "observers": sender.receiver_count(),
         "time": event.1.format(&format_description::well_known::Iso8601::DEFAULT).unwrap(),
         "event": event.0
     });

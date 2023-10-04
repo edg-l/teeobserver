@@ -51,6 +51,7 @@ Useful typescript interfaces:
 // Event structure send to the websocket
 
 export interface MasterEvent {
+    observers: number
     event: Event
     time: string
 }
