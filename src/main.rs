@@ -5,16 +5,15 @@ use std::{
     time::Duration,
 };
 
-use axum::{response::Html, routing::get, Router};
+use axum::{Router, response::Html, routing::get};
 use http::Method;
 use reqwest::Client;
-use sqlx::{postgres::PgPoolOptions, PgPool};
 use structures::{MasterEvent, ServerListMap};
 use time::OffsetDateTime;
 use tokio::{
     sync::{
-        broadcast::{self, Sender},
         RwLock,
+        broadcast::{self, Sender},
     },
     time::interval,
 };
@@ -39,7 +38,6 @@ async fn main() -> anyhow::Result<()> {
 
 #[derive(Debug, Clone)]
 pub struct AppState {
-    pub pool: PgPool,
     pub servers: Arc<RwLock<ServerListMap>>,
     pub client: Client,
     pub events: Arc<RwLock<VecDeque<(MasterEvent, OffsetDateTime)>>>,
@@ -49,15 +47,6 @@ pub struct AppState {
 async fn run() -> anyhow::Result<()> {
     dotenvy::dotenv().ok();
     tracing_subscriber::fmt::init();
-
-    let pool = PgPoolOptions::new()
-        .max_connections(
-            std::env::var("DATABASE_MAX_CONNECTIONS")
-                .map(|x| x.parse().expect("valid number"))
-                .unwrap_or(30),
-        )
-        .connect(&std::env::var("DATABASE_URL")?)
-        .await?;
 
     let client = reqwest::Client::new();
     let servers = fetch_master(&client).await?;
@@ -77,7 +66,6 @@ async fn run() -> anyhow::Result<()> {
     let events_sender = Arc::new(events_sender);
 
     let state = AppState {
-        pool,
         client,
         servers,
         events,
@@ -216,11 +204,18 @@ async fn run() -> anyhow::Result<()> {
     let port = std::env::var("PORT")
         .unwrap_or_else(|_| "3000".to_string())
         .parse()?;
+
     let addr = SocketAddr::from(([127, 0, 0, 1], port));
+
     tracing::info!("listening on http://{}", addr);
-    axum::Server::bind(&addr)
-        .serve(app.into_make_service_with_connect_info::<SocketAddr>())
-        .await?;
+
+    let listener = tokio::net::TcpListener::bind(addr).await?;
+
+    axum::serve(
+        listener,
+        app.into_make_service_with_connect_info::<SocketAddr>(),
+    )
+    .await?;
 
     task.abort();
 

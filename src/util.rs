@@ -17,7 +17,7 @@ pub async fn fetch_master(client: &Client) -> Result<ServerListMap, reqwest::Err
     let servers: HashMap<_, _> = res
         .servers
         .into_iter()
-        .filter_map(|x| x.addresses.get(0).cloned().map(|address| (address, x)))
+        .filter_map(|x| x.addresses.first().cloned().map(|address| (address, x)))
         .collect();
     Ok(ServerListMap { servers })
 }

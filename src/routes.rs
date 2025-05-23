@@ -2,18 +2,18 @@ use std::{net::SocketAddr, sync::Arc};
 
 use axum::{
     extract::{
-        ws::{Message, WebSocket, WebSocketUpgrade},
         ConnectInfo, State,
+        ws::{Message, WebSocket, WebSocketUpgrade},
     },
     response::IntoResponse,
-    TypedHeader,
 };
+use axum_extra::TypedHeader;
 use serde_json::json;
-use time::{format_description, OffsetDateTime};
+use time::{OffsetDateTime, format_description};
 use tokio::sync::broadcast::{self, Sender};
 use tracing::{error, info};
 
-use crate::{structures::MasterEvent, AppState};
+use crate::{AppState, structures::MasterEvent};
 
 pub async fn ws_handler(
     ws: WebSocketUpgrade,
@@ -77,5 +77,5 @@ async fn handle_event(
         "event": event.0
     });
 
-    sock.send(Message::Text(payload.to_string())).await
+    sock.send(Message::Text(payload.to_string().into())).await
 }
