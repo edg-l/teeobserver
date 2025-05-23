@@ -4,6 +4,8 @@ version = "0.2.0"
 edition = "2024"
 authors = ["Edgar <git@edgarluque.com>"]
 license = "AGPL-3.0"
+description = "A tool to broadcast DDNet / Teeworlds master server events."
+keywords = ["ddnet", "teeworlds"]
 repository = "https://github.com/edg-l/teeobserver"
 homepage = "https://github.com/edg-l/teeobserver"
 
